@@ -3,87 +3,156 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Adicionar jogo — Catálogo de Jogos</title>
+  <meta name="theme-color" content="#0b0d17">
+  <title>Novo jogo — Catálogo de Jogos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-content">
-      <a class="btn btn-ghost" href="index.html">&larr; Voltar ao catálogo</a>
-      <h1 id="page-title">Adicionar jogo</h1>
+  <div class="bg-glow bg-glow-1" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow-2" aria-hidden="true"></div>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/>
+            <line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/>
+            <path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.544-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/>
+          </svg>
+        </span>
+        <span class="brand-name">GameLog</span>
+      </a>
+      <a class="btn btn-ghost" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Catálogo
+      </a>
     </div>
   </header>
 
   <main class="container container-narrow">
-    <form id="game-form" class="card form-card" novalidate>
-      <div class="field">
-        <label for="igdb-search">Buscar jogo (IGDB)</label>
-        <input
-          type="search"
-          id="igdb-search"
-          class="input"
-          placeholder="Digite o nome para buscar nome e capa..."
-          autocomplete="off"
-        >
-        <div id="search-results" class="search-results" hidden></div>
-        <p id="search-status" class="hint" hidden></p>
-      </div>
+    <div class="page-head">
+      <h1 id="page-title">Novo jogo</h1>
+      <p class="page-sub">Registre o jogo, a nota, o período e as suas impressões.</p>
+      <span class="badge badge-accent" id="edit-badge" hidden>Editando</span>
+    </div>
 
-      <div class="field">
-        <label for="title">Título *</label>
-        <input type="text" id="title" class="input" maxlength="255" required>
-      </div>
+    <form id="game-form" class="form-card" novalidate>
+      <section class="form-section">
+        <h2 class="section-title">
+          <span class="section-num">1</span>
+          Identificação
+        </h2>
 
-      <div class="field">
-        <label for="cover-url">URL da capa *</label>
-        <input type="url" id="cover-url" class="input" placeholder="https://..." required>
-        <img id="cover-preview" class="cover-preview" alt="Prévia da capa" hidden>
-      </div>
-
-      <div class="field">
-        <span class="field-label">Nota *</span>
-        <div class="rating-input">
-          <div id="rating-widget"></div>
-          <span id="rating-value" class="hint">0 / 5</span>
-        </div>
-        <p class="hint">Clique na metade esquerda da estrela para meia nota</p>
-      </div>
-
-      <div class="field-row">
         <div class="field">
-          <label for="play-start">Jogado de *</label>
-          <input type="date" id="play-start" class="input" required>
+          <label for="igdb-search">Buscar no IGDB</label>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.7" y2="16.7"/>
+            </svg>
+            <input
+              type="search"
+              id="igdb-search"
+              placeholder="Digite o nome do jogo (ex.: Chrono Trigger)..."
+              autocomplete="off"
+            >
+            <span class="spinner" id="search-spinner" hidden aria-hidden="true"></span>
+          </div>
+          <div id="search-results" class="search-results" hidden></div>
+          <p id="search-status" class="hint hint-warn" hidden></p>
         </div>
+
         <div class="field">
-          <label for="play-end">Até</label>
-          <input type="date" id="play-end" class="input">
-          <label class="checkbox">
-            <input type="checkbox" id="in-progress">
-            Ainda estou jogando
-          </label>
+          <label for="title">Título *</label>
+          <input type="text" id="title" class="input" maxlength="255" placeholder="Nome do jogo" required>
         </div>
-      </div>
 
-      <div class="field">
-        <label for="impressions">Impressões</label>
-        <textarea
-          id="impressions"
-          class="input textarea"
-          rows="8"
-          placeholder="O que você achou do jogo? História, gameplay, gráficos..."
-        ></textarea>
-      </div>
+        <div class="field">
+          <label for="cover-url">URL da capa *</label>
+          <div class="cover-row">
+            <div class="cover-preview-wrap" id="cover-preview-wrap" hidden>
+              <img id="cover-preview" class="cover-preview" alt="Prévia da capa">
+              <button type="button" class="icon-btn" id="cover-remove" aria-label="Remover capa">&times;</button>
+            </div>
+            <input type="url" id="cover-url" class="input" placeholder="https://..." required>
+          </div>
+          <p class="hint">Busque acima para preencher automático ou cole qualquer URL de imagem.</p>
+        </div>
+      </section>
 
-      <div id="form-error" class="banner" hidden></div>
+      <section class="form-section">
+        <h2 class="section-title">
+          <span class="section-num">2</span>
+          Nota
+        </h2>
+
+        <div class="rating-box">
+          <div id="rating-widget" class="rating-widget"></div>
+          <div class="rating-readout">
+            <span id="rating-value">0</span><span class="rating-total">/5</span>
+          </div>
+        </div>
+        <p class="hint">Clique na metade esquerda da estrela para meio ponto. Setas do teclado também funcionam.</p>
+      </section>
+
+      <section class="form-section">
+        <h2 class="section-title">
+          <span class="section-num">3</span>
+          Período jogado
+        </h2>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="play-start">De *</label>
+            <input type="date" id="play-start" class="input" required>
+          </div>
+          <div class="field">
+            <label for="play-end">Até</label>
+            <input type="date" id="play-end" class="input">
+          </div>
+        </div>
+
+        <label class="switch-row">
+          <input type="checkbox" id="in-progress">
+          <span class="switch" aria-hidden="true"></span>
+          <span>Ainda estou jogando (período em aberto)</span>
+        </label>
+      </section>
+
+      <section class="form-section">
+        <h2 class="section-title">
+          <span class="section-num">4</span>
+          Impressões
+        </h2>
+
+        <div class="field">
+          <label for="impressions">O que você achou?</label>
+          <textarea
+            id="impressions"
+            class="input textarea"
+            rows="7"
+            placeholder="História, gameplay, gráficos, trilha sonora, pontos fortes e fracos..."
+          ></textarea>
+          <p class="hint"><span id="char-count">0</span> caracteres</p>
+        </div>
+      </section>
 
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Salvar</button>
-        <a href="index.html" class="btn btn-ghost">Cancelar</a>
+        <a href="index.html" class="btn btn-ghost btn-lg">Cancelar</a>
+        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">Salvar jogo</button>
       </div>
     </form>
   </main>
 
+  <div id="toast-root" class="toast-root" aria-live="polite"></div>
+
   <script src="js/stars.js"></script>
+  <script src="js/ui.js"></script>
   <script src="js/form.js"></script>
 </body>
 </html>

@@ -3,18 +3,23 @@
 
   const form = document.getElementById('game-form');
   const pageTitle = document.getElementById('page-title');
+  const editBadge = document.getElementById('edit-badge');
   const searchInput = document.getElementById('igdb-search');
+  const searchSpinner = document.getElementById('search-spinner');
   const searchResults = document.getElementById('search-results');
   const searchStatus = document.getElementById('search-status');
   const titleInput = document.getElementById('title');
   const coverInput = document.getElementById('cover-url');
+  const coverPreviewWrap = document.getElementById('cover-preview-wrap');
   const coverPreview = document.getElementById('cover-preview');
+  const coverRemove = document.getElementById('cover-remove');
   const ratingValue = document.getElementById('rating-value');
   const playStartInput = document.getElementById('play-start');
   const playEndInput = document.getElementById('play-end');
   const inProgressCheck = document.getElementById('in-progress');
   const impressionsInput = document.getElementById('impressions');
-  const formError = document.getElementById('form-error');
+  const charCount = document.getElementById('char-count');
+  const submitBtn = document.getElementById('submit-btn');
 
   const params = new URLSearchParams(window.location.search);
   const editingId = params.get('id');
@@ -27,50 +32,66 @@
     rating: 0,
     interactive: true,
     onChange: function (rating) {
-      ratingValue.textContent = rating.toLocaleString('pt-BR') + ' / 5';
+      ratingValue.textContent = rating.toLocaleString('pt-BR');
     },
   });
 
-  function showError(message) {
-    formError.textContent = message;
-    formError.hidden = false;
-  }
-
-  function clearError() {
-    formError.hidden = true;
-    formError.textContent = '';
+  function markInvalid(input, invalid) {
+    input.classList.toggle('invalid', invalid);
   }
 
   function updateCoverPreview() {
     const url = coverInput.value.trim();
     if (!url) {
-      coverPreview.hidden = true;
+      coverPreviewWrap.hidden = true;
+      coverPreview.removeAttribute('src');
       return;
     }
+    coverPreviewWrap.hidden = false;
     coverPreview.src = url;
-    coverPreview.hidden = false;
   }
 
   coverInput.addEventListener('input', function () {
     selectedIgdbId = null;
+    markInvalid(coverInput, false);
     updateCoverPreview();
   });
 
   coverPreview.addEventListener('error', function () {
-    coverPreview.hidden = true;
+    coverPreviewWrap.hidden = true;
   });
 
+  coverRemove.addEventListener('click', function () {
+    coverInput.value = '';
+    selectedIgdbId = null;
+    updateCoverPreview();
+    coverInput.focus();
+  });
+
+  /* ----------------------------------------------------------
+     Busca IGDB
+     ---------------------------------------------------------- */
   function hideSearchResults() {
     searchResults.hidden = true;
     searchResults.textContent = '';
   }
 
+  function showStatus(message) {
+    searchStatus.textContent = message;
+    searchStatus.hidden = false;
+  }
+
+  function hideStatus() {
+    searchStatus.hidden = true;
+    searchStatus.textContent = '';
+  }
+
   function renderSearchResults(results) {
     searchResults.textContent = '';
+
     if (!results.length) {
       hideSearchResults();
-      searchStatus.textContent = 'Nenhum jogo encontrado. Preencha manualmente.';
-      searchStatus.hidden = false;
+      showStatus('Nenhum jogo encontrado. Preencha os campos manualmente.');
       return;
     }
 
@@ -83,9 +104,7 @@
       img.src = game.coverUrl;
       img.alt = '';
       img.loading = 'lazy';
-      img.addEventListener('error', function () {
-        img.remove();
-      });
+      img.addEventListener('error', function () { img.remove(); });
 
       const info = document.createElement('span');
       info.className = 'search-item-info';
@@ -97,9 +116,7 @@
       const meta = document.createElement('small');
       const parts = [];
       if (game.releaseYear) parts.push(game.releaseYear);
-      if (game.platforms && game.platforms.length) {
-        parts.push(game.platforms.slice(0, 3).join(', '));
-      }
+      if (game.platforms && game.platforms.length) parts.push(game.platforms.slice(0, 3).join(', '));
       meta.textContent = parts.join(' · ');
       info.appendChild(meta);
 
@@ -110,46 +127,49 @@
         titleInput.value = game.title;
         coverInput.value = game.coverUrl;
         selectedIgdbId = game.igdbId;
-        hideSearchResults();
+        markInvalid(titleInput, false);
+        markInvalid(coverInput, false);
         searchInput.value = '';
-        searchStatus.hidden = true;
-        clearError();
+        hideSearchResults();
+        hideStatus();
         updateCoverPreview();
+        UI.toast('Jogo preenchido a partir do IGDB.', 'success');
       });
 
       searchResults.appendChild(item);
     });
+
     searchResults.hidden = false;
-    searchStatus.hidden = true;
+    hideStatus();
   }
 
   async function runSearch() {
     const query = searchInput.value.trim();
     if (query.length < 2) {
       hideSearchResults();
-      searchStatus.hidden = true;
+      hideStatus();
       return;
     }
 
     const requestId = ++searchRequest;
-    searchStatus.textContent = 'Buscando...';
-    searchStatus.hidden = false;
+    searchSpinner.hidden = false;
     hideSearchResults();
+    showStatus('Buscando...');
 
     try {
       const res = await fetch('/api/games/search?q=' + encodeURIComponent(query));
       const data = await res.json();
       if (requestId !== searchRequest) return;
       if (!res.ok) {
-        searchStatus.textContent = data.error || 'Busca indisponível.';
-        searchStatus.hidden = false;
+        showStatus(data.error || 'Busca indisponível no momento.');
         return;
       }
       renderSearchResults(data.results);
     } catch {
       if (requestId !== searchRequest) return;
-      searchStatus.textContent = 'Erro ao buscar. Preencha os campos manualmente.';
-      searchStatus.hidden = false;
+      showStatus('Erro ao buscar. Preencha os campos manualmente.');
+    } finally {
+      if (requestId === searchRequest) searchSpinner.hidden = true;
     }
   }
 
@@ -163,6 +183,8 @@
       event.preventDefault();
       clearTimeout(searchTimer);
       runSearch();
+    } else if (event.key === 'Escape') {
+      hideSearchResults();
     }
   });
 
@@ -172,38 +194,81 @@
     }
   });
 
+  /* ----------------------------------------------------------
+     Período
+     ---------------------------------------------------------- */
+  playStartInput.addEventListener('change', function () {
+    markInvalid(playStartInput, false);
+    playEndInput.min = playStartInput.value || '';
+    if (playEndInput.value && playEndInput.value < playStartInput.value) {
+      playEndInput.value = '';
+    }
+  });
+
+  playEndInput.addEventListener('change', function () {
+    markInvalid(playEndInput, false);
+  });
+
   inProgressCheck.addEventListener('change', function () {
     playEndInput.disabled = inProgressCheck.checked;
     if (inProgressCheck.checked) playEndInput.value = '';
   });
 
-  function validate() {
-    if (!titleInput.value.trim()) return 'Informe o título do jogo';
-    if (!coverInput.value.trim()) return 'Informe a URL da capa';
+  /* ----------------------------------------------------------
+     Impressões: contador
+     ---------------------------------------------------------- */
+  impressionsInput.addEventListener('input', function () {
+    charCount.textContent = String(impressionsInput.value.length);
+  });
 
-    try {
-      const url = new URL(coverInput.value.trim());
-      if (url.protocol !== 'http:' && url.protocol !== 'https:') throw new Error();
-    } catch {
-      return 'A URL da capa deve começar com http:// ou https://';
+  /* ----------------------------------------------------------
+     Validação e envio
+     ---------------------------------------------------------- */
+  function validate() {
+    const title = titleInput.value.trim();
+    const cover = coverInput.value.trim();
+
+    markInvalid(titleInput, !title);
+    if (!title) {
+      titleInput.focus();
+      return 'Informe o título do jogo';
     }
 
-    if (!playStartInput.value) return 'Informe a data inicial do período';
+    let coverValid = false;
+    try {
+      const url = new URL(cover);
+      coverValid = cover && (url.protocol === 'http:' || url.protocol === 'https:');
+    } catch {
+      coverValid = false;
+    }
+    markInvalid(coverInput, !coverValid);
+    if (!coverValid) {
+      coverInput.focus();
+      return 'Informe uma URL de capa válida (http/https)';
+    }
+
+    markInvalid(playStartInput, !playStartInput.value);
+    if (!playStartInput.value) {
+      playStartInput.focus();
+      return 'Informe a data inicial do período';
+    }
 
     const playEnd = playEndInput.value;
     if (playEnd && playEnd < playStartInput.value) {
+      markInvalid(playEndInput, true);
+      playEndInput.focus();
       return 'A data final não pode ser anterior à data inicial';
     }
+
     return null;
   }
 
   form.addEventListener('submit', async function (event) {
     event.preventDefault();
-    clearError();
 
     const validationError = validate();
     if (validationError) {
-      showError(validationError);
+      UI.toast(validationError, 'error');
       return;
     }
 
@@ -217,30 +282,34 @@
       igdbId: selectedIgdbId,
     };
 
-    const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
+    submitBtn.textContent = 'Salvando...';
 
     try {
       const url = editingId ? '/api/games/' + editingId : '/api/games';
-      const method = editingId ? 'PUT' : 'POST';
       const res = await fetch(url, {
-        method,
+        method: editingId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const data = await res.json().catch(function () { return {}; });
       if (!res.ok) {
-        showError(data.error || 'Erro ao salvar o jogo.');
+        UI.toast(data.error || 'Erro ao salvar o jogo.', 'error');
         return;
       }
-      window.location.href = 'index.html';
+      UI.toast(editingId ? 'Jogo atualizado!' : 'Jogo adicionado ao catálogo!', 'success');
+      setTimeout(function () { window.location.href = 'index.html'; }, 600);
     } catch {
-      showError('Não foi possível salvar. Verifique se o servidor está rodando.');
+      UI.toast('Não foi possível salvar. Verifique se o servidor está rodando.', 'error');
     } finally {
       submitBtn.disabled = false;
+      submitBtn.textContent = editingId ? 'Salvar alterações' : 'Salvar jogo';
     }
   });
 
+  /* ----------------------------------------------------------
+     Modo edição
+     ---------------------------------------------------------- */
   async function loadGame() {
     try {
       const res = await fetch('/api/games/' + editingId);
@@ -248,17 +317,24 @@
       const game = await res.json();
 
       pageTitle.textContent = 'Editar jogo';
+      document.title = 'Editar jogo — Catálogo de Jogos';
+      editBadge.hidden = false;
+      submitBtn.textContent = 'Salvar alterações';
+
       titleInput.value = game.title;
       coverInput.value = game.coverUrl;
       selectedIgdbId = game.igdbId ? Number(game.igdbId) : null;
       ratingWidget.rating = Number(game.rating);
-      ratingValue.textContent = Number(game.rating).toLocaleString('pt-BR') + ' / 5';
+      ratingValue.textContent = Number(game.rating).toLocaleString('pt-BR');
       playStartInput.value = game.playStart;
+      playEndInput.min = game.playStart;
       if (game.playEnd) playEndInput.value = game.playEnd;
       impressionsInput.value = game.impressions || '';
+      charCount.textContent = String(impressionsInput.value.length);
       updateCoverPreview();
     } catch {
-      showError('Jogo não encontrado.');
+      UI.toast('Jogo não encontrado.', 'error');
+      setTimeout(function () { window.location.href = 'index.html'; }, 1200);
     }
   }
 
