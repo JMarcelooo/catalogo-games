@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar jogo — Catálogo de Jogos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-content">
+      <a class="btn btn-ghost" href="index.html">&larr; Voltar ao catálogo</a>
+      <h1 id="page-title">Adicionar jogo</h1>
+    </div>
+  </header>
+
+  <main class="container container-narrow">
+    <form id="game-form" class="card form-card" novalidate>
+      <div class="field">
+        <label for="igdb-search">Buscar jogo (IGDB)</label>
+        <input
+          type="search"
+          id="igdb-search"
+          class="input"
+          placeholder="Digite o nome para buscar nome e capa..."
+          autocomplete="off"
+        >
+        <div id="search-results" class="search-results" hidden></div>
+        <p id="search-status" class="hint" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="title">Título *</label>
+        <input type="text" id="title" class="input" maxlength="255" required>
+      </div>
+
+      <div class="field">
+        <label for="cover-url">URL da capa *</label>
+        <input type="url" id="cover-url" class="input" placeholder="https://..." required>
+        <img id="cover-preview" class="cover-preview" alt="Prévia da capa" hidden>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Nota *</span>
+        <div class="rating-input">
+          <div id="rating-widget"></div>
+          <span id="rating-value" class="hint">0 / 5</span>
+        </div>
+        <p class="hint">Clique na metade esquerda da estrela para meia nota</p>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="play-start">Jogado de *</label>
+          <input type="date" id="play-start" class="input" required>
+        </div>
+        <div class="field">
+          <label for="play-end">Até</label>
+          <input type="date" id="play-end" class="input">
+          <label class="checkbox">
+            <input type="checkbox" id="in-progress">
+            Ainda estou jogando
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="impressions">Impressões</label>
+        <textarea
+          id="impressions"
+          class="input textarea"
+          rows="8"
+          placeholder="O que você achou do jogo? História, gameplay, gráficos..."
+        ></textarea>
+      </div>
+
+      <div id="form-error" class="banner" hidden></div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="index.html" class="btn btn-ghost">Cancelar</a>
+      </div>
+    </form>
+  </main>
+
+  <script src="js/stars.js"></script>
+  <script src="js/form.js"></script>
+</body>
+</html>

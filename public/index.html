@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Jogos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-content">
+      <h1>Catálogo de Jogos</h1>
+      <p>Jogos que eu joguei, com nota, período e impressões</p>
+      <a class="btn btn-primary" href="form.html">+ Adicionar jogo</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="filters" aria-label="Filtros">
+      <input
+        type="search"
+        id="search-input"
+        class="input"
+        placeholder="Buscar por título..."
+        aria-label="Buscar por título"
+      >
+      <select id="min-rating" class="input select" aria-label="Nota mínima">
+        <option value="">Qualquer nota</option>
+        <option value="0.5">0.5 ou mais</option>
+        <option value="1">1 ou mais</option>
+        <option value="1.5">1.5 ou mais</option>
+        <option value="2">2 ou mais</option>
+        <option value="2.5">2.5 ou mais</option>
+        <option value="3">3 ou mais</option>
+        <option value="3.5">3.5 ou mais</option>
+        <option value="4">4 ou mais</option>
+        <option value="4.5">4.5 ou mais</option>
+        <option value="5">5 estrelas</option>
+      </select>
+    </section>
+
+    <div id="error-banner" class="banner" hidden></div>
+
+    <section id="games-list" class="games-grid" aria-live="polite"></section>
+
+    <div id="empty-state" class="empty" hidden>
+      <p>Nenhum jogo encontrado.</p>
+      <a class="btn btn-primary" href="form.html">+ Adicionar seu primeiro jogo</a>
+    </div>
+  </main>
+
+  <script src="js/stars.js"></script>
+  <script src="js/catalog.js"></script>
+</body>
+</html>
